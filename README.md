@@ -1,3 +1,9 @@
+[![Forge with Alphinium](https://img.shields.io/badge/🔨_Forge_with_Alphinium-Build_Your_Version-6366f1?style=for-the-badge&logo=github)](https://alphinium.com/forge?template=spots-app)
+
+> **This is an Alphinium template.** Click the badge above to fork this project and have an AI agent build your customised version automatically.
+
+---
+
 # Spots 📍
 
 **Discover & share secret locations — built on alphinium-app**
