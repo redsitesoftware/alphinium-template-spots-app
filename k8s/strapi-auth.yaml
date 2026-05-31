@@ -7,12 +7,12 @@ metadata:
   namespace: alphinium-alphinium-cluster
 type: Opaque
 stringData:
-  database-password: "strapi_payments_p4ss"
-  app-keys: "00063a27beb7d6e8cd9d12d552eec7da,e9029df8b8d856906c61e5201d71bb08"
-  jwt-secret: "b981ad9f89c2ce361e023b35179562e0038214aa70db776005c9324590e06b78"
-  admin-jwt-secret: "f8682bf5a1ac4dad463ef51f781994e5e9f6a309012f2fbabf6e08e9de74d6a3"
-  api-token-salt: "dcb0fe740a36b7c51a38ebc1e0d81353"
-  transfer-token-salt: "127c4f6c1a0830187fe21a9e36bdae92"
+  database-password: "REPLACE_WITH_YOUR_DB_PASSWORD"
+  app-keys: "REPLACE_WITH_YOUR_APP_KEYS"
+  jwt-secret: "REPLACE_WITH_YOUR_JWT_SECRET"
+  admin-jwt-secret: "REPLACE_WITH_YOUR_ADMIN_JWT_SECRET"
+  api-token-salt: "REPLACE_WITH_YOUR_API_TOKEN_SALT"
+  transfer-token-salt: "REPLACE_WITH_YOUR_TRANSFER_TOKEN_SALT"
 
 ---
 # Deployment
