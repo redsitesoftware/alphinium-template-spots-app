@@ -1,0 +1,145 @@
+# ============================================================
+# alphinium-app — Pod Deployment Manifest
+# ============================================================
+# Consumed by:
+#   - alphinium-forge: auto-populate pod configs on project creation
+#   - alphinium-input-output pod_deployer: auto-generate secrets before deploy
+#   - alphinium-cli: prompt for user-provided vars during `pod deploy`
+#   - deploy.sh in test harnesses: know what to generate/set
+# ============================================================
+
+version: "1"
+
+pods:
+  backend:
+    name: pod-test-backend
+    dockerfile: Dockerfile.backend
+    build_context: "."
+    port: 1337
+    type: web
+    env:
+      # Auto-generated secrets — created once and stored in pod config.
+      # Should NOT be regenerated on each deploy (would invalidate sessions/tokens).
+      auto_generate:
+        ADMIN_JWT_SECRET:
+          description: "Strapi admin panel JWT secret"
+          type: token
+        APP_KEYS:
+          description: "Strapi session keys (4 keys, comma-separated)"
+          type: multi_token
+          count: 4
+        API_TOKEN_SALT:
+          description: "Salt for hashing Strapi API tokens"
+          type: token
+        JWT_SECRET:
+          description: "JWT secret for Strapi user authentication"
+          type: token
+        TRANSFER_TOKEN_SALT:
+          description: "Salt for Strapi transfer tokens"
+          type: token
+        ENCRYPTION_KEY:
+          description: "Key for encrypting admin secrets"
+          type: token
+
+      # Static defaults — safe to bake in; can be overridden by user
+      defaults:
+        DATABASE_CLIENT: sqlite
+        DATABASE_FILENAME: .tmp/data.db
+        HOST: "0.0.0.0"
+        PORT: "1337"
+        NODE_ENV: production
+
+      # User-provided — optional for test/dev; required for production
+      user_provided:
+        STRIPE_SECRET_KEY:
+          description: "Stripe secret key (sk_test_... or sk_live_...)"
+          required: false
+        STRIPE_PUBLISHABLE_KEY:
+          description: "Stripe publishable key"
+          required: false
+        STRIPE_WEBHOOK_SECRET:
+          description: "Stripe webhook signing secret"
+          required: false
+        STRIPE_PRICE_DEVELOPER_MONTHLY:
+          description: "Stripe price ID for Developer plan (monthly)"
+          required: false
+        STRIPE_PRICE_DEVELOPER_ANNUAL:
+          description: "Stripe price ID for Developer plan (annual)"
+          required: false
+        STRIPE_PRICE_TEAM_MONTHLY:
+          description: "Stripe price ID for Team plan (monthly)"
+          required: false
+        STRIPE_PRICE_TEAM_ANNUAL:
+          description: "Stripe price ID for Team plan (annual)"
+          required: false
+        STRIPE_PRICE_ENTERPRISE_MONTHLY:
+          description: "Stripe price ID for Enterprise plan (monthly)"
+          required: false
+        STRIPE_PRICE_ENTERPRISE_ANNUAL:
+          description: "Stripe price ID for Enterprise plan (annual)"
+          required: false
+        FRONTEND_URL:
+          description: "Frontend URL for Stripe redirect (e.g. https://yourapp.com)"
+          required: false
+        INTERNAL_API_SECRET:
+          description: "Shared secret for payments microservice auth"
+          required: false
+
+  frontend:
+    name: pod-test-frontend
+    dockerfile: Dockerfile.frontend
+    build_context: "."
+    port: 80
+    type: web
+    env:
+      defaults: {}
+      auto_generate: {}
+      user_provided:
+        EXPO_PUBLIC_API_URL:
+          description: "Backend API URL for the frontend to connect to"
+          required: false
+        GOOGLE_ANALYTICS_ID:
+          description: "Google Analytics 4 Measurement ID (e.g. G-XXXXXXXXXX). If set, GA tracking is injected at container startup — no rebuild needed."
+          required: false
+        ADMOB_ANDROID_APP_ID:
+          description: "AdMob Android App ID (ca-app-pub-xxx~yyy). Get from admob.google.com → Apps. Required for real ads (alphinium-ads addon)."
+          required: false
+        ADMOB_IOS_APP_ID:
+          description: "AdMob iOS App ID (ca-app-pub-xxx~yyy). Get from admob.google.com → Apps."
+          required: false
+        ADMOB_ANDROID_BANNER_ID:
+          description: "AdMob Android Banner Ad Unit ID (ca-app-pub-xxx/yyy)"
+          required: false
+        ADMOB_IOS_BANNER_ID:
+          description: "AdMob iOS Banner Ad Unit ID"
+          required: false
+        ADMOB_ANDROID_INTERSTITIAL_ID:
+          description: "AdMob Android Interstitial Ad Unit ID"
+          required: false
+        ADMOB_IOS_INTERSTITIAL_ID:
+          description: "AdMob iOS Interstitial Ad Unit ID"
+          required: false
+        ADMOB_ANDROID_REWARDED_ID:
+          description: "AdMob Android Rewarded Ad Unit ID"
+          required: false
+        ADMOB_IOS_REWARDED_ID:
+          description: "AdMob iOS Rewarded Ad Unit ID"
+          required: false
+        EXPO_PUBLIC_ANALYTICS_SITE_ID:
+          description: "alphinium-analytics site ID (issued when you deploy the analytics pod). Enables self-hosted analytics — privacy-safe, no cookies, agent-queryable."
+          required: false
+        EXPO_PUBLIC_ANALYTICS_ENDPOINT:
+          description: "alphinium-analytics collector URL (e.g. https://analytics.yourapp.com). Defaults to https://analytics.alphinium.com if using hosted mode."
+          required: false
+        EXPO_PUBLIC_ADMIN_EMAILS:
+          description: "Comma-separated email addresses that get access to the Add-ons screen in-app (e.g. you@example.com). These should be the email addresses of the alphinium platform users who own/manage this forge project — NOT end-user app accounts. Leave empty to hide the Add-ons tab from all users."
+          required: false
+        EXPO_PUBLIC_ALPHINIUM_APP_ID:
+          description: "alphinium-ai forge project ID (issued by alphinium platform when you add the @alphinium/ai addon). Required to enable AI chat in your app."
+          required: false
+        EXPO_PUBLIC_ALPHINIUM_AI_KEY:
+          description: "alphinium-ai API key for your forge project (issued alongside APP_ID). Authenticates your app to the AI gateway."
+          required: false
+        EXPO_PUBLIC_ALPHINIUM_AI_ENDPOINT:
+          description: "alphinium-ai gateway WebSocket URL. Defaults to wss://api.ci-agents.chatinstance.com (alphinium-hosted). Override for self-hosted gateway."
+          required: false

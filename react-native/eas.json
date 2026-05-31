@@ -1,0 +1,63 @@
+{
+  "cli": {
+    "version": ">= 13.2.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleDebug"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": true
+      }
+    },
+    "production": {
+      "ios": {
+        "bundleIdentifier": "com.alphinium.strapiprototype"
+      },
+      "android": {
+        "buildType": "app-bundle",
+        "package": "com.alphinium.strapiprototype"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "${EXPO_PUBLIC_API_URL}",
+        "EXPO_PUBLIC_APP_NAME": "${EXPO_PUBLIC_APP_NAME}"
+      }
+    },
+    "local-android": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "${EXPO_PUBLIC_API_URL}",
+        "EXPO_PUBLIC_APP_NAME": "${EXPO_PUBLIC_APP_NAME}"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "TO_BE_CONFIGURED",
+        "ascAppId": "TO_BE_CONFIGURED",
+        "appleTeamId": "TO_BE_CONFIGURED"
+      },
+      "android": {
+        "serviceAccountKeyPath": "TO_BE_CONFIGURED"
+      }
+    }
+  }
+}

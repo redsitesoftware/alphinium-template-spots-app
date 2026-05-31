@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "Spots",
+    "slug": "spots-app",
+    "version": "1.0.0",
+    "scheme": "spots",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F1A0F"
+    },
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.redsitesoftware.spots",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Spots uses your camera to photograph locations you pin.",
+        "NSPhotoLibraryUsageDescription": "Spots accesses your photo library to add photos to spots.",
+        "NSMicrophoneUsageDescription": "Spots uses the microphone for voice search.",
+        "NSPhotoLibraryAddUsageDescription": "Spots saves photos to your photo library.",
+        "NSLocationWhenInUseUsageDescription": "Spots uses your location to show nearby spots on the map.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0F1A0F"
+      },
+      "package": "com.redsitesoftware.spots",
+      "compileSdkVersion": 36,
+      "targetSdkVersion": 35,
+      "buildToolsVersion": "35.0.0",
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "template": "./web/index.html"
+    },
+    "plugins": []
+  }
+}

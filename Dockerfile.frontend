@@ -1,0 +1,46 @@
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# git is required for npm to install git+https:// dependencies
+# GITHUB_TOKEN is injected by the user-pods build API to authenticate private git deps
+ARG GITHUB_TOKEN
+RUN apk add --no-cache git
+
+# Install dependencies — configure git to use HTTPS+token for github.com so private
+# npm git deps (e.g. @alphinium/auth) can be fetched without SSH keys
+COPY react-native/package*.json ./
+RUN if [ -n "$GITHUB_TOKEN" ]; then \
+      git config --global url."https://${GITHUB_TOKEN}@github.com/".insteadOf "ssh://git@github.com/" && \
+      git config --global --add url."https://${GITHUB_TOKEN}@github.com/".insteadOf "git@github.com:"; \
+    fi && \
+    npm ci --legacy-peer-deps
+
+# Build Expo web app
+COPY react-native/ ./
+RUN npx expo export --platform web
+
+# ── Production stage ──────────────────────────────────────────────────────────
+FROM nginx:alpine
+
+RUN apk add --no-cache bash
+
+WORKDIR /usr/share/nginx/html
+
+# Copy built web app (Expo exports to dist/)
+COPY --from=builder /app/dist ./
+
+# Copy nginx config + entrypoint
+COPY Dockerfile.frontend.nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# Runtime environment variables
+ENV GOOGLE_ANALYTICS_ID=""
+ENV SITE_NAME=""
+ENV DOMAIN=""
+
+EXPOSE 80
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["nginx", "-g", "daemon off;"]

@@ -1,0 +1,51 @@
+{
+  "kind": "collectionType",
+  "collectionName": "subscriptions",
+  "info": {
+    "singularName": "subscription",
+    "pluralName": "subscriptions",
+    "displayName": "Subscription",
+    "description": "Stripe subscription records. plan_tier is a free-form string matching your config/plans.js tier keys."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "stripe_customer_id": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "stripe_subscription_id": {
+      "type": "string",
+      "unique": true
+    },
+    "plan_tier": {
+      "type": "string",
+      "default": "free",
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["trialing", "active", "past_due", "canceled", "unpaid", "incomplete", "incomplete_expired", "paused"],
+      "default": "active",
+      "required": true
+    },
+    "cancel_at_period_end": {
+      "type": "boolean",
+      "default": false
+    },
+    "current_period_end": {
+      "type": "datetime"
+    },
+    "trial_end": {
+      "type": "datetime"
+    }
+  }
+}

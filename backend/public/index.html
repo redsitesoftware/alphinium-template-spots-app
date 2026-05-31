@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alphinium — Billing Platform</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f14;
+      --card: #161b27;
+      --border: #1f2937;
+      --accent: #6366f1;
+      --accent2: #8b5cf6;
+      --text: #f1f5f9;
+      --muted: #64748b;
+      --green: #22c55e;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    header { border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-weight: 700; font-size: 1.25rem; letter-spacing: -0.02em; }
+    .logo span { color: var(--accent); }
+    .badge { font-size: 0.7rem; background: #1a2535; border: 1px solid var(--border); color: var(--muted); padding: 0.2rem 0.6rem; border-radius: 99px; margin-left: 0.5rem; vertical-align: middle; }
+    nav a { color: var(--muted); text-decoration: none; font-size: 0.9rem; margin-left: 1.5rem; }
+    nav a:hover { color: var(--text); }
+    main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; text-align: center; }
+    h1 { font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1.25rem; }
+    h1 em { font-style: normal; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { font-size: 1.1rem; color: var(--muted); max-width: 520px; line-height: 1.6; margin-bottom: 3rem; }
+    .actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 4rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.75rem; border-radius: 10px; font-size: 0.95rem; font-weight: 600; text-decoration: none; transition: all 0.15s; cursor: pointer; border: none; }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-secondary { background: var(--card); border: 1px solid var(--border); color: var(--text); }
+    .btn-secondary:hover { border-color: var(--accent); }
+    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; padding: 0.6rem 1.25rem; }
+    .btn-ghost:hover { color: var(--text); border-color: #374151; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; max-width: 860px; width: 100%; margin-bottom: 3rem; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; text-align: left; }
+    .card-icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+    .card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; }
+    .card p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+    .mobile-section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; max-width: 560px; width: 100%; margin-bottom: 2rem; }
+    .mobile-section h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .mobile-section p { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.25rem; line-height: 1.5; }
+    .store-btns { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .store-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; border-radius: 10px; background: #1a2535; border: 1px solid var(--border); color: var(--text); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: border-color 0.15s; }
+    .store-btn:hover { border-color: var(--accent); }
+    .store-btn .store-icon { font-size: 1.2rem; }
+    .store-btn small { display: block; font-size: 0.7rem; color: var(--muted); font-weight: 400; }
+    .status-bar { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: var(--muted); }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    footer { border-top: 1px solid var(--border); padding: 1.25rem 2rem; text-align: center; font-size: 0.78rem; color: var(--muted); }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <span>alphinium</span>
+      <span class="badge">TEST MODE</span>
+    </div>
+    <nav>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/admin">Admin</a>
+      <a href="https://github.com/redsitesoftware/alphinium-app" target="_blank">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Billing infrastructure<br>for <em>alphinium apps</em></h1>
+    <p class="subtitle">
+      Stripe-powered subscriptions, webhook handling, and user management —
+      deployed as a user-pod, ready to power any fork of alphinium-app.
+    </p>
+
+    <div class="actions">
+      <a href="/pricing.html" class="btn btn-primary">
+        💳 View Pricing & Subscribe
+      </a>
+      <a href="/admin" class="btn btn-secondary">
+        ⚙️ Strapi Admin
+      </a>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">📡</div>
+        <h3>Live Payments API</h3>
+        <p>Stripe checkout sessions, webhooks, and subscription lifecycle fully wired up.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📱</div>
+        <h3>Mobile Ready</h3>
+        <p>React Native app (iOS & Android) includes PricingScreen and StripeCheckoutScreen — points to this API.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔄</div>
+        <h3>Multi-Fork Deployable</h3>
+        <p>No hardcoded URLs. Set <code>EXPO_PUBLIC_API_URL</code> and this pod's URL — done.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🛡️</div>
+        <h3>JWT Auth</h3>
+        <p>Strapi users-permissions with JWT. Register, login, and manage subscriptions securely.</p>
+      </div>
+    </div>
+
+    <div class="mobile-section">
+      <h2>📱 Mobile Apps</h2>
+      <p>
+        The Alphinium iOS and Android apps include the full payments flow: pricing tiers,
+        Stripe checkout (WebView), and subscription management. Build with
+        <code>EXPO_PUBLIC_API_URL</code> pointing to this pod.
+      </p>
+      <div class="store-btns">
+        <a href="#" class="store-btn" title="Coming soon">
+          <span class="store-icon">🍎</span>
+          <div>
+            <small>Download on the</small>
+            App Store <small style="display:inline;color:#6366f1">(coming soon)</small>
+          </div>
+        </a>
+        <a href="#" class="store-btn" title="Coming soon">
+          <span class="store-icon">🤖</span>
+          <div>
+            <small>Get it on</small>
+            Google Play <small style="display:inline;color:#6366f1">(coming soon)</small>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <span class="dot"></span>
+      <span id="api-status">Checking API…</span>
+    </div>
+  </main>
+
+  <footer>
+    Powered by <a href="https://strapi.io" target="_blank">Strapi</a> + 
+    <a href="https://stripe.com" target="_blank">Stripe</a> + 
+    <a href="https://alphinium.io" target="_blank">Alphinium user-pods</a>
+    &nbsp;·&nbsp;
+    <a href="https://github.com/redsitesoftware" target="_blank">redsitesoftware</a>
+  </footer>
+
+  <script src="/js/landing.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+.DS_Store
+.env
+.env.local
+.env.test
+.idea/
+.vscode/
+*.log
+build/
+coverage/
+dist/
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Generated Stripe price files
+.stripe-prices-*.json

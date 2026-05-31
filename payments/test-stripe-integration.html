@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Stripe Integration Test Suite - @alphinium/stripe-billing</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #dc2626;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --bg-light: #f7fafc;
+            --text-dark: #1a202c;
+            --text-light: #718096;
+            --border: #e2e8f0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: var(--bg-light);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .mode-toggle {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--bg-light);
+            border-radius: 8px;
+        }
+        
+        .mode-toggle button {
+            padding: 8px 16px;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .mode-toggle button.active {
+            background: var(--info);
+            color: white;
+            border-color: var(--info);
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .product-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .product-section h2 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .tier-card {
+            background: var(--bg-light);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .tier-card h3 {
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .tier-card.popular {
+            border-color: var(--primary);
+            background: #fef2f2;
+        }
+        
+        .tier-card.popular h3::after {
+            content: " ⭐";
+        }
+        
+        .price-options {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .price-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            flex: 1;
+            min-width: 100px;
+        }
+        
+        .price-btn:hover {
+            border-color: var(--primary);
+            background: #fef2f2;
+        }
+        
+        .price-btn.beta {
+            border-color: var(--warning);
+            background: #fffbeb;
+        }
+        
+        .price-btn.annual {
+            border-color: var(--success);
+        }
+        
+        .test-btn {
+            width: 100%;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+        }
+        
+        .test-btn:hover {
+            background: #b91c1c;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        }
+        
+        .test-btn:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        
+        .status.pending { background: #fef3c7; color: #92400e; }
+        .status.ready { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        
+        .price-id {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            word-break: break-all;
+        }
+        
+        .test-cards {
+            background: #eff6ff;
+            border: 2px solid var(--info);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .test-cards h3 {
+            color: var(--info);
+            margin-bottom: 1rem;
+        }
+        
+        .card-info {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .instructions {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        .instructions h3 {
+            color: #92400e;
+            margin-bottom: 1rem;
+        }
+        
+        .instructions ol {
+            margin-left: 1.5rem;
+        }
+        
+        .instructions li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .test-results {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .test-results h2 {
+            margin-bottom: 1rem;
+        }
+        
+        .test-log {
+            background: #1a202c;
+            color: #4ade80;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .features {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+        }
+        
+        .features-list {
+            list-style: none;
+            margin-top: 0.25rem;
+        }
+        
+        .features-list li::before {
+            content: "✓ ";
+            color: var(--success);
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Stripe Integration Test Suite</h1>
+            <p><strong>@alphinium/stripe-billing</strong> - Test all products, prices, and flows</p>
+            
+            <div class="mode-toggle">
+                <button id="mode-test" class="active" onclick="setMode('test')">
+                    🧪 Test Mode
+                </button>
+                <button id="mode-live" onclick="setMode('live')">
+                    🔴 Live Mode
+                </button>
+            </div>
+            
+            <div id="mode-info" style="margin-top: 1rem; padding: 1rem; background: #eff6ff; border-radius: 6px;">
+                <strong>🧪 Test Mode Active</strong> - Use test cards below. No real charges.
+            </div>
+        </div>
+        
+        <div class="test-cards">
+            <h3>💳 Test Card Numbers (Test Mode Only)</h3>
+            <div class="card-info">
+                <strong>Success (Visa):</strong> 4242 4242 4242 4242 | Exp: 12/34 | CVC: 123
+            </div>
+            <div class="card-info">
+                <strong>Success (Mastercard):</strong> 5555 5555 5555 4444 | Exp: 12/34 | CVC: 123
+            </div>
+            <div class="card-info">
+                <strong>Decline:</strong> 4000 0000 0000 0002 | Exp: 12/34 | CVC: 123
+            </div>
+            <div class="card-info">
+                <strong>3D Secure:</strong> 4000 0025 0000 3155 | Exp: 12/34 | CVC: 123
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>📋 Testing Instructions</h3>
+            <ol>
+                <li><strong>✅ Products Created:</strong> All 10 products with 24 prices created in LIVE Stripe via automation</li>
+                <li><strong>✅ Price IDs Updated:</strong> All real Stripe price IDs configured and ready to test</li>
+                <li><strong>Switch Mode:</strong> Use buttons above to toggle between Test/Live mode</li>
+                <li><strong>Test Checkout:</strong> Click "Test Checkout" buttons below (Note: LIVE mode uses real cards!)</li>
+                <li><strong>Verify Webhooks:</strong> Check terminal logs for webhook events during checkout</li>
+            </ol>
+            <p style="margin-top: 1rem; color: #059669; font-weight: bold;">
+                🎉 Ready to test! All products configured via automated SDK setup.
+            </p>
+        </div>
+        
+        <div class="product-grid">
+            <!-- ALPHINIUM -->
+            <div class="product-section">
+                <h2>🖥️ Alphinium</h2>
+                
+                <div class="tier-card">
+                    <h3>Developer</h3>
+                    <div class="features">3 desktops • Unlimited hours • 50GB storage • API access</div>
+                    <div class="price-options">
+                        <button class="price-btn" onclick="testCheckout('alphinium', 'developer', 'monthly')">
+                            💵 $29/mo
+                        </button>
+                        <button class="price-btn beta" onclick="testCheckout('alphinium', 'developer', 'beta')">
+                            🎉 $20/mo Beta
+                        </button>
+                        <button class="price-btn annual" onclick="testCheckout('alphinium', 'developer', 'annual')">
+                            📅 $264/yr
+                        </button>
+                    </div>
+                    <div class="price-id" id="price-alphinium-developer-monthly">
+                        Price ID: <span class="price-id-display" data-product="alphinium" data-tier="developer" data-interval="monthly">price_1T6JIhHc2oT07zw5BTzlrJJe</span>
+                    </div>
+                    <button class="test-btn" onclick="testCheckout('alphinium', 'developer', 'monthly')">
+                        Test Checkout
+                    </button>
+                </div>
+                
+                <div class="tier-card popular">
+                    <h3>Team</h3>
+                    <div class="features">10 desktops • Unlimited hours • 200GB storage • Team collaboration</div>
+                    <div class="price-options">
+                        <button class="price-btn" onclick="testCheckout('alphinium', 'team', 'monthly')">
+                            💵 $99/mo
+                        </button>
+                        <button class="price-btn beta" onclick="testCheckout('alphinium', 'team', 'beta')">
+                            🎉 $69/mo Beta
+                        </button>
+                        <button class="price-btn annual" onclick="testCheckout('alphinium', 'team', 'annual')">
+                            📅 $888/yr
+                        </button>
+                    </div>
+                    <div class="price-id" id="price-alphinium-team-monthly">
+                        Price ID: <span class="price-id-display" data-product="alphinium" data-tier="team" data-interval="monthly">price_1T6JIkHc2oT07zw5m8AKTzhR</span>
+                    </div>
+                    <button class="test-btn" onclick="testCheckout('alphinium', 'team', 'monthly')">
+                        Test Checkout
+                    </button>
+                </div>
+            </div>
+            
+            <!-- REDSITESOFTWARE (Existing - Working) -->
+            <div class="product-section" style="border: 3px solid var(--success);">
+                <h2>🔴 RedSiteSoftware (TEST & LIVE - Working)</h2>
+                <div style="background: #E8F5E8; padding: 0.5rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem;">
+                    ✅ These products are already created in Stripe with TEST and LIVE modes working!
+                </div>
+                
+                <div class="tier-card" style="border: 2px solid var(--info); background: #eff6ff;">
+                    <h3>💲 $1 Test Payment</h3>
+                    <div class="features">Test the checkout flow with a minimal $1 payment</div>
+                    <div class="price-options">
+                        <button class="price-btn" style="background: var(--info); color: white;">
+                            💵 $1 USD
+                        </button>
+                    </div>
+                    <div class="price-id" style="font-size: 0.75rem; margin-top: 0.5rem;">
+                        <strong>TEST MODE - VERIFIED WORKING ✅</strong>
+                    </div>
+                    <a href="https://buy.stripe.com/test_cNidRbadtbpl1zCaTh1Jm03" class="test-btn" target="_blank" style="display: inline-block; text-align: center; text-decoration: none; margin-top: 0.5rem; background: var(--info);">
+                        🧪 Test $1 Payment (Test Card)
+                    </a>
+                    
+                    <div style="margin-top: 1rem; padding: 0.75rem; background: #FEE2E2; border: 2px solid #DC2626; border-radius: 6px;">
+                        <strong style="color: #DC2626;">🔴 LIVE MODE - REAL MONEY!</strong>
+                        <div style="font-size: 0.85rem; margin-top: 0.5rem;">This charges a real credit card $1 AUD.</div>
+                    </div>
+                    <a href="https://buy.stripe.com/28E4gz8gOffGcd9gPk" class="test-btn" target="_blank" style="display: inline-block; text-align: center; text-decoration: none; margin-top: 0.5rem; background: #DC2626;">
+                        💳 LIVE $1 Payment (Real Card!)
+                    </a>
+                </div>
+                
+                <div class="tier-card">
+                    <h3>Strategy Consultation</h3>
+                    <div class="features">2-hour technical consultation + follow-up report</div>
+                    <div class="price-options">
+                        <button class="price-btn" style="background: var(--success);">
+                            💵 $500 AUD
+                        </button>
+                    </div>
+                    <div class="price-id" style="font-size: 0.75rem; margin-top: 0.5rem;">
+                        <strong>Product:</strong> prod_TrRXlhHkyfxb6a<br>
+                        <strong>TEST LINK - VERIFIED ✅</strong>
+                    </div>
+                    <a href="https://buy.stripe.com/test_aFa7sN3P5fFB3HK3qP1Jm00" class="test-btn" target="_blank" style="display: inline-block; text-align: center; text-decoration: none; margin-top: 0.5rem;">
+                        🧪 Test Checkout
+                    </a>
+                    <a href="https://buy.stripe.com/6oU00j2Wu2sU4KH2Yu" class="test-btn" target="_blank" style="display: inline-block; text-align: center; text-decoration: none; margin-top: 0.5rem; background: #DC2626;">
+                        💳 LIVE Payment Link
+                    </a>
+                </div>
+                
+                <div class="tier-card">
+                    <h3>Technical Assessment</h3>
+                    <div class="features">Complete system review + recommendations document</div>
+                    <div class="price-options">
+                        <button class="price-btn" style="background: var(--success);">
+                            💵 $1,500 AUD
+                        </button>
+                    </div>
+                    <div class="price-id" style="font-size: 0.75rem; margin-top: 0.5rem;">
+                        <strong>Product:</strong> prod_TrRXaqqzHK94b9<br>
+                        <strong>TEST LINK - VERIFIED ✅</strong>
+                    </div>
+                    <a href="https://buy.stripe.com/test_00w3cx1GX651924f9x1Jm01" class="test-btn" target="_blank" style="display: inline-block; text-align: center; text-decoration: none; margin-top: 0.5rem;">
+                        🧪 Test Checkout
+                    </a>
+                    <a href="https://buy.stripe.com/fZu3cvaoWaZq0ureHc" class="test-btn" target="_blank" style="display: inline-block; text-align: center; text-decoration: none; margin-top: 0.5rem; background: #DC2626;">
+                        💳 LIVE Payment Link
+                    </a>
+                </div>
+                
+                <div class="tier-card">
+                    <h3>Development Retainer</h3>
+                    <div class="features">Priority access + 25 hours development time</div>
+                    <div class="price-options">
+                        <button class="price-btn" style="background: var(--success);">
+                            💵 $5,000 AUD/mo
+                        </button>
+                    </div>
+                    <div class="price-id" style="font-size: 0.75rem; margin-top: 0.5rem;">
+                        <strong>Product:</strong> prod_TrRXKl6ihoFBAR<br>
+                        <strong>TEST LINK - VERIFIED ✅</strong>
+                    </div>
+                    <a href="https://buy.stripe.com/test_bJeeVf4T99hd2DG0eD1Jm02" class="test-btn" target="_blank" style="display: inline-block; text-align: center; text-decoration: none; margin-top: 0.5rem;">
+                        🧪 Test Checkout
+                    </a>
+                    <a href="https://buy.stripe.com/3cIbJ1bt04B22Czcz4" class="test-btn" target="_blank" style="display: inline-block; text-align: center; text-decoration: none; margin-top: 0.5rem; background: #DC2626;">
+                        💳 LIVE Payment Link
+                    </a>
+                </div>
+            </div>
+            
+            <!-- CHATINSTANCE -->
+            <div class="product-section">
+                <h2>💬 ChatInstance</h2>
+                
+                <div class="tier-card">
+                    <h3>Starter</h3>
+                    <div class="features">500 interactions/mo • 1 assistant • Email support</div>
+                    <div class="price-options">
+                        <button class="price-btn" onclick="testCheckout('chatinstance', 'starter', 'monthly')">
+                            💵 $99/mo
+                        </button>
+                        <button class="price-btn beta" onclick="testCheckout('chatinstance', 'starter', 'beta')">
+                            🎉 $69/mo Beta
+                        </button>
+                        <button class="price-btn annual" onclick="testCheckout('chatinstance', 'starter', 'annual')">
+                            📅 $948/yr
+                        </button>
+                    </div>
+                    <div class="price-id" id="price-chatinstance-starter-monthly">
+                        Price ID: <span class="price-id-display" data-product="chatinstance" data-tier="starter" data-interval="monthly">price_1T6JInHc2oT07zw5PQQf8Mm2</span>
+                    </div>
+                    <button class="test-btn" onclick="testCheckout('chatinstance', 'starter', 'monthly')">
+                        Test Checkout
+                    </button>
+                </div>
+                
+                <div class="tier-card popular">
+                    <h3>Professional</h3>
+                    <div class="features">Unlimited interactions • 3 assistants • Priority support • Analytics</div>
+                    <div class="price-options">
+                        <button class="price-btn" onclick="testCheckout('chatinstance', 'professional', 'monthly')">
+                            💵 $199/mo
+                        </button>
+                        <button class="price-btn beta" onclick="testCheckout('chatinstance', 'professional', 'beta')">
+                            🎉 $139/mo Beta
+                        </button>
+                        <button class="price-btn annual" onclick="testCheckout('chatinstance', 'professional', 'annual')">
+                            📅 $1,908/yr
+                        </button>
+                    </div>
+                    <div class="price-id" id="price-chatinstance-professional-monthly">
+                        Price ID: <span class="price-id-display" data-product="chatinstance" data-tier="professional" data-interval="monthly">price_1T6JIqHc2oT07zw5vAKwlayK</span>
+                    </div>
+                    <button class="test-btn" onclick="testCheckout('chatinstance', 'professional', 'monthly')">
+                        Test Checkout
+                    </button>
+                </div>
+                
+                <div class="tier-card">
+                    <h3>Business</h3>
+                    <div class="features">Unlimited • Multi-location • Custom integrations • Dedicated support</div>
+                    <div class="price-options">
+                        <button class="price-btn" onclick="testCheckout('chatinstance', 'business', 'monthly')">
+                            💵 $299/mo
+                        </button>
+                        <button class="price-btn beta" onclick="testCheckout('chatinstance', 'business', 'beta')">
+                            🎉 $209/mo Beta
+                        </button>
+                        <button class="price-btn annual" onclick="testCheckout('chatinstance', 'business', 'annual')">
+                            📅 $2,868/yr
+                        </button>
+                    </div>
+                    <div class="price-id" id="price-chatinstance-business-monthly">
+                        Price ID: <span class="price-id-display" data-product="chatinstance" data-tier="business" data-interval="monthly">price_1T6JItHc2oT07zw5BWy9Cj4W</span>
+                    </div>
+                    <button class="test-btn" onclick="testCheckout('chatinstance', 'business', 'monthly')">
+                        Test Checkout
+                    </button>
+                </div>
+            </div>
+            
+            <!-- ENTERPRISE -->
+            <div class="product-section">
+                <h2>🏢 Enterprise</h2>
+                
+                <div class="tier-card">
+                    <h3>Starter</h3>
+                    <div class="features">Dedicated cluster • 25 users • 50GB/user • Business hours support</div>
+                    <div class="price-options">
+                        <button class="price-btn" onclick="testCheckout('enterprise', 'starter', 'monthly')">
+                            💵 $2,500/mo
+                        </button>
+                        <button class="price-btn beta" onclick="testCheckout('enterprise', 'starter', 'beta')">
+                            🎉 $2,000/mo Beta
+                        </button>
+                        <button class="price-btn annual" onclick="testCheckout('enterprise', 'starter', 'annual')">
+                            📅 $27,000/yr
+                        </button>
+                    </div>
+                    <div class="price-id" id="price-enterprise-starter-monthly">
+                        Price ID: <span class="price-id-display" data-product="enterprise" data-tier="starter" data-interval="monthly">price_1T6JIwHc2oT07zw51n0pd0bb</span>
+                    </div>
+                    <button class="test-btn" onclick="testCheckout('enterprise', 'starter', 'monthly')">
+                        Test Checkout
+                    </button>
+                </div>
+                
+                <div class="tier-card popular">
+                    <h3>Growth</h3>
+                    <div class="features">Redundancy • 100 users • 100GB/user • 24/5 support • SSO</div>
+                    <div class="price-options">
+                        <button class="price-btn" onclick="testCheckout('enterprise', 'growth', 'monthly')">
+                            💵 $5,000/mo
+                        </button>
+                        <button class="price-btn beta" onclick="testCheckout('enterprise', 'growth', 'beta')">
+                            🎉 $4,000/mo Beta
+                        </button>
+                        <button class="price-btn annual" onclick="testCheckout('enterprise', 'growth', 'annual')">
+                            📅 $54,000/yr
+                        </button>
+                    </div>
+                    <div class="price-id" id="price-enterprise-growth-monthly">
+                        Price ID: <span class="price-id-display" data-product="enterprise" data-tier="growth" data-interval="monthly">price_1T6JIzHc2oT07zw5DnfylnEy</span>
+                    </div>
+                    <button class="test-btn" onclick="testCheckout('enterprise', 'growth', 'monthly')">
+                        Test Checkout
+                    </button>
+                </div>
+                
+                <div class="tier-card">
+                    <h3>Plus (Custom)</h3>
+                    <div class="features">100+ users • Multi-region • SLA • Dedicated manager</div>
+                    <div class="status pending">Manual Invoicing</div>
+                    <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-light);">
+                        Enterprise Plus requires custom quotes. Not handled through Stripe checkout.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- USERPODS -->
+            <div class="product-section">
+                <h2>🔧 UserPods Add-Ons</h2>
+                <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 1rem;">
+                    Requires base Alphinium subscription
+                </p>
+                
+                <div class="tier-card">
+                    <h3>Hobby</h3>
+                    <div class="features">0.5 vCPU • 512MB RAM • 10GB storage • 100GB network</div>
+                    <div class="price-options">
+                        <button class="price-btn" onclick="testCheckout('userpods', 'hobby', 'monthly')">
+                            💵 $29/mo
+                        </button>
+                    </div>
+                    <div class="price-id" id="price-userpods-hobby-monthly">
+                        Price ID: <span class="price-id-display" data-product="userpods" data-tier="hobby" data-interval="monthly">price_1T6JJ2Hc2oT07zw5MISsMZNa</span>
+                    </div>
+                    <button class="test-btn" onclick="testCheckout('userpods', 'hobby', 'monthly')">
+                        Test Checkout
+                    </button>
+                </div>
+                
+                <div class="tier-card popular">
+                    <h3>Pro</h3>
+                    <div class="features">1 vCPU • 1GB RAM • 25GB storage • 250GB network</div>
+                    <div class="price-options">
+                        <button class="price-btn" onclick="testCheckout('userpods', 'pro', 'monthly')">
+                            💵 $49/mo
+                        </button>
+                    </div>
+                    <div class="price-id" id="price-userpods-pro-monthly">
+                        Price ID: <span class="price-id-display" data-product="userpods" data-tier="pro" data-interval="monthly">price_1T6JJ3Hc2oT07zw5bJHjNgaS</span>
+                    </div>
+                    <button class="test-btn" onclick="testCheckout('userpods', 'pro', 'monthly')">
+                        Test Checkout
+                    </button>
+                </div>
+                
+                <div class="tier-card">
+                    <h3>Business</h3>
+                    <div class="features">2 vCPU • 2GB RAM • 50GB storage • 500GB network</div>
+                    <div class="price-options">
+                        <button class="price-btn" onclick="testCheckout('userpods', 'business', 'monthly')">
+                            💵 $79/mo
+                        </button>
+                    </div>
+                    <div class="price-id" id="price-userpods-business-monthly">
+                        Price ID: <span class="price-id-display" data-product="userpods" data-tier="business" data-interval="monthly">price_1T6JJ4Hc2oT07zw50zhXa6wb</span>
+                    </div>
+                    <button class="test-btn" onclick="testCheckout('userpods', 'business', 'monthly')">
+                        Test Checkout
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-results">
+            <h2>📊 Test Results</h2>
+            <div class="test-log" id="test-log">
+                Waiting for tests...<br>
+                Click any "Test Checkout" button above to start testing.
+            </div>
+            <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+                <button class="test-btn" style="flex: 1; background: var(--text-light);" onclick="clearLog()">
+                    Clear Log
+                </button>
+                <button class="test-btn" style="flex: 1; background: var(--success);" onclick="copyPriceIds()">
+                    📋 Copy All Price IDs
+                </button>
+            </div>
+        </div>
+        
+        <div style="background: white; border-radius: 12px; padding: 1.5rem; margin-top: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <h2 style="margin-bottom: 1rem;">✅ Test Checklist</h2>
+            <ul class="features-list" style="list-style: none;">
+                <li id="check-products"><input type="checkbox"> All products created in Stripe</li>
+                <li id="check-prices"><input type="checkbox"> All prices configured with correct amounts</li>
+                <li id="check-trials"><input type="checkbox"> Trial periods set (7, 14, or 30 days)</li>
+                <li id="check-checkout"><input type="checkbox"> Checkout flows work for all tiers</li>
+                <li id="check-webhooks"><input type="checkbox"> Webhooks configured and receiving events</li>
+                <li id="check-portal"><input type="checkbox"> Customer portal works (cancel/manage)</li>
+                <li id="check-beta"><input type="checkbox"> Beta pricing tested</li>
+                <li id="check-annual"><input type="checkbox"> Annual billing tested</li>
+                <li id="check-decline"><input type="checkbox"> Decline scenarios tested</li>
+                <li id="check-live"><input type="checkbox"> Switched to live mode and retested</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        let currentMode = 'test';
+        
+        // Price ID mapping (update these after creating products in Stripe)
+        const priceIds = {
+          "test": {
+                    "alphinium": {
+                              "developer": {
+                                        "monthly": "price_1T6K1XHc2oT07zw5xJEvwNFb",
+                                        "beta": "price_1T6K1YHc2oT07zw5Y9NFtJvl",
+                                        "annual": "price_1T6K1YHc2oT07zw53b4oB46w"
+                              },
+                              "team": {
+                                        "monthly": "price_1T6K1aHc2oT07zw5thUG9Kp8",
+                                        "beta": "price_1T6K1bHc2oT07zw50woKjfmq",
+                                        "annual": "price_1T6K1bHc2oT07zw5M0cPs7VH"
+                              }
+                    },
+                    "chatinstance": {
+                              "starter": {
+                                        "monthly": "price_1T6K1dHc2oT07zw5KIQLfmZ0",
+                                        "beta": "price_1T6K1eHc2oT07zw56p9NwUtP",
+                                        "annual": "price_1T6K1fHc2oT07zw5k8vKRaMk"
+                              },
+                              "professional": {
+                                        "monthly": "price_1T6K1gHc2oT07zw50NJMqtPf",
+                                        "beta": "price_1T6K1hHc2oT07zw5FDg8HvGy",
+                                        "annual": "price_1T6K1iHc2oT07zw5cnFgS2G1"
+                              },
+                              "business": {
+                                        "monthly": "price_1T6K1jHc2oT07zw53irLBpUs",
+                                        "beta": "price_1T6K1kHc2oT07zw5wKhzC7hH",
+                                        "annual": "price_1T6K1lHc2oT07zw5jdsmpXGr"
+                              }
+                    },
+                    "enterprise": {
+                              "starter": {
+                                        "monthly": "price_1T6K1mHc2oT07zw5tLPcndM6",
+                                        "beta": "price_1T6K1nHc2oT07zw58bJ4O2XX",
+                                        "annual": "price_1T6K1oHc2oT07zw5NcCyEyH5"
+                              },
+                              "growth": {
+                                        "monthly": "price_1T6K1pHc2oT07zw5MDHkGNam",
+                                        "beta": "price_1T6K1qHc2oT07zw5E7Ua3CZY",
+                                        "annual": "price_1T6K1rHc2oT07zw5WVV4Zs0U"
+                              }
+                    },
+                    "userpods": {
+                              "hobby": {
+                                        "monthly": "price_1T6K1sHc2oT07zw5QsrbMQa3"
+                              },
+                              "pro": {
+                                        "monthly": "price_1T6K1uHc2oT07zw5hfS7Aoci"
+                              },
+                              "business": {
+                                        "monthly": "price_1T6K1wHc2oT07zw55yZrigbN"
+                              }
+                    }
+          },
+          "live": {
+                    "alphinium": {
+                              "developer": {
+                                        "monthly": "price_1T6JIhHc2oT07zw5BTzlrJJe",
+                                        "beta": "price_1T6JIiHc2oT07zw5ubke9xad",
+                                        "annual": "price_1T6JIjHc2oT07zw58lZu0Sic"
+                              },
+                              "team": {
+                                        "monthly": "price_1T6JIkHc2oT07zw5m8AKTzhR",
+                                        "beta": "price_1T6JIlHc2oT07zw56KEg6Bxb",
+                                        "annual": "price_1T6JImHc2oT07zw5WfD24fsb"
+                              }
+                    },
+                    "chatinstance": {
+                              "starter": {
+                                        "monthly": "price_1T6JInHc2oT07zw5PQQf8Mm2",
+                                        "beta": "price_1T6JIoHc2oT07zw5Ip3z9D1F",
+                                        "annual": "price_1T6JIpHc2oT07zw5oQ2lGlLS"
+                              },
+                              "professional": {
+                                        "monthly": "price_1T6JIqHc2oT07zw5vAKwlayK",
+                                        "beta": "price_1T6JIrHc2oT07zw5MgduiwU7",
+                                        "annual": "price_1T6JIrHc2oT07zw5q7fDNcuE"
+                              },
+                              "business": {
+                                        "monthly": "price_1T6JItHc2oT07zw5BWy9Cj4W",
+                                        "beta": "price_1T6JIuHc2oT07zw5D9aeQUq4",
+                                        "annual": "price_1T6JIuHc2oT07zw5mPjCNUGv"
+                              }
+                    },
+                    "enterprise": {
+                              "starter": {
+                                        "monthly": "price_1T6JIwHc2oT07zw51n0pd0bb",
+                                        "beta": "price_1T6JIwHc2oT07zw5k4uW8pAH",
+                                        "annual": "price_1T6JIxHc2oT07zw5ewMoMjJl"
+                              },
+                              "growth": {
+                                        "monthly": "price_1T6JIzHc2oT07zw5DnfylnEy",
+                                        "beta": "price_1T6JIzHc2oT07zw5JZJeJrYv",
+                                        "annual": "price_1T6JJ0Hc2oT07zw5TLVJQkJX"
+                              }
+                    },
+                    "userpods": {
+                              "hobby": {
+                                        "monthly": "price_1T6JJ2Hc2oT07zw5MISsMZNa"
+                              },
+                              "pro": {
+                                        "monthly": "price_1T6JJ3Hc2oT07zw5bJHjNgaS"
+                              },
+                              "business": {
+                                        "monthly": "price_1T6JJ4Hc2oT07zw50zhXa6wb"
+                              }
+                    }
+          }
+};
+        
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('mode-test').classList.toggle('active', mode === 'test');
+            document.getElementById('mode-live').classList.toggle('active', mode === 'live');
+            
+            const modeInfo = document.getElementById('mode-info');
+            if (mode === 'test') {
+                modeInfo.innerHTML = '<strong>🧪 Test Mode Active</strong> - Use test cards below. No real charges.';
+                modeInfo.style.background = '#eff6ff';
+            } else {
+                modeInfo.innerHTML = '<strong>🔴 LIVE Mode Active</strong> - Real charges will be made! Use real payment methods only.';
+                modeInfo.style.background = '#fee2e2';
+            }
+            
+            log(`Switched to ${mode.toUpperCase()} mode`);
+        }
+        
+        function log(message) {
+            const logEl = document.getElementById('test-log');
+            const timestamp = new Date().toLocaleTimeString();
+            logEl.innerHTML += `<br>[${timestamp}] ${message}`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('test-log').innerHTML = 'Log cleared.<br>Ready for testing...';
+        }
+        
+        async function testCheckout(product, tier, interval) {
+            const priceId = priceIds[currentMode][product][tier][interval];
+            
+            if (!priceId || priceId.startsWith('price_' + currentMode + '_')) {
+                log(`⚠️ WARNING: Price ID not updated for ${product} ${tier} ${interval}`);
+                log(`   Using placeholder: ${priceId}`);
+                alert(`❌ Price ID not configured!\n\nProduct: ${product} ${tier} ${interval}\nPrice ID: ${priceId}\n\nRun: npm run setup:stripe:${currentMode}`);
+                return;
+            }
+            
+            log(`🚀 Testing ${product} - ${tier} - ${interval}`);
+            log(`   Price ID: ${priceId}`);
+            log(`   Mode: ${currentMode.toUpperCase()}`);
+            
+            // Call backend API to create checkout session
+            try {
+                log(`   📡 Calling backend API in ${currentMode.toUpperCase()} mode...`);
+                
+                const response = await fetch('/api/create-checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        product, 
+                        tier, 
+                        interval,
+                        mode: currentMode,
+                        priceId: priceId  // Send price ID from frontend!
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to create checkout');
+                }
+                
+                const session = await response.json();
+                
+                log(`   ✅ Checkout session created (${session.mode?.toUpperCase()}): ${session.sessionId}`);
+                log(`   🔗 Redirecting to Stripe Checkout...`);
+                
+                // Redirect to Stripe Checkout
+                window.location.href = session.url;
+                
+            } catch (error) {
+                log(`   ❌ Error: ${error.message}`);
+                alert(`❌ Checkout failed!\n\n${error.message}\n\nCheck:\n- Server is running\n- Stripe key is valid for ${currentMode} mode\n- Price ID exists in Stripe`);
+            }
+        }
+        
+        function copyPriceIds() {
+            const mode = currentMode;
+            let output = `# Stripe Price IDs (${mode.toUpperCase()} Mode)\n\n`;
+            
+            for (const [product, tiers] of Object.entries(priceIds[mode])) {
+                output += `## ${product.toUpperCase()}\n`;
+                for (const [tier, prices] of Object.entries(tiers)) {
+                    output += `### ${tier}\n`;
+                    for (const [interval, priceId] of Object.entries(prices)) {
+                        output += `${interval}: ${priceId}\n`;
+                    }
+                    output += '\n';
+                }
+                output += '\n';
+            }
+            
+            navigator.clipboard.writeText(output).then(() => {
+                log('📋 All price IDs copied to clipboard!');
+                alert('Price IDs copied to clipboard!');
+            });
+        }
+        
+        // Log initial load
+        log('🧪 Stripe Test Suite loaded');
+        log('📦 Using @alphinium/stripe-billing package');
+        log(`Mode: ${currentMode.toUpperCase()}`);
+        log('');
+        log('💡 Instructions:');
+        log('   1. Create products in Stripe Dashboard (follow Marketing #11)');
+        log('   2. Update price IDs in this file (lines 267-336)');
+        log('   3. Test each checkout flow');
+        log('   4. Verify webhooks are received');
+        log('   5. Switch to Live mode and retest');
+    </script>
+</body>
+</html>

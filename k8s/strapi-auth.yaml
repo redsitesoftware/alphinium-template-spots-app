@@ -1,0 +1,162 @@
+---
+# Secret — Strapi Auth deployment credentials
+apiVersion: v1
+kind: Secret
+metadata:
+  name: strapi-auth-secret
+  namespace: alphinium-alphinium-cluster
+type: Opaque
+stringData:
+  database-password: "strapi_payments_p4ss"
+  app-keys: "00063a27beb7d6e8cd9d12d552eec7da,e9029df8b8d856906c61e5201d71bb08"
+  jwt-secret: "b981ad9f89c2ce361e023b35179562e0038214aa70db776005c9324590e06b78"
+  admin-jwt-secret: "f8682bf5a1ac4dad463ef51f781994e5e9f6a309012f2fbabf6e08e9de74d6a3"
+  api-token-salt: "dcb0fe740a36b7c51a38ebc1e0d81353"
+  transfer-token-salt: "127c4f6c1a0830187fe21a9e36bdae92"
+
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: strapi-auth
+  namespace: alphinium-alphinium-cluster
+  labels:
+    app: strapi-auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: strapi-auth
+  template:
+    metadata:
+      labels:
+        app: strapi-auth
+    spec:
+      enableServiceLinks: false   # prevent E2BIG from hundreds of auto-injected service env vars
+      containers:
+        - name: strapi-auth
+          image: us-central1-docker.pkg.dev/alphinium-production/user-pods/alphinium-strapi-auth:stable
+          ports:
+            - containerPort: 1337
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: HOST
+              value: "0.0.0.0"
+            - name: PORT
+              value: "1337"
+            - name: PUBLIC_URL
+              value: "https://auth.alphinium.io"
+            - name: DATABASE_CLIENT
+              value: "postgres"
+            - name: DATABASE_HOST
+              value: "alphinium-alphinium-cluster-postgresql"
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_NAME
+              value: "strapi_auth"
+            - name: DATABASE_USERNAME
+              value: "strapi"
+            - name: DATABASE_SSL
+              value: "false"
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-auth-secret
+                  key: database-password
+            - name: APP_KEYS
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-auth-secret
+                  key: app-keys
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-auth-secret
+                  key: jwt-secret
+            - name: ADMIN_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-auth-secret
+                  key: admin-jwt-secret
+            - name: API_TOKEN_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-auth-secret
+                  key: api-token-salt
+            - name: TRANSFER_TOKEN_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-auth-secret
+                  key: transfer-token-salt
+            - name: CORS_ORIGINS
+              value: "https://auth.alphinium.io,https://trivia.user-pods.alphinium.io,https://app.alphinium.com,https://alphinium.com,http://localhost:3000,http://localhost:8081,http://localhost:19006"
+            # Required by the @alphinium/stripe-billing plugin bundled in Strapi
+            - name: STRIPE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: alphinium-alphinium-cluster-strapi-secret
+                  key: stripe-secret-key
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /_health
+              port: 1337
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /_health
+              port: 1337
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 3
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: strapi-auth
+  namespace: alphinium-alphinium-cluster
+spec:
+  selector:
+    app: strapi-auth
+  ports:
+    - port: 1337
+      targetPort: 1337
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: strapi-auth-ingress
+  namespace: alphinium-alphinium-cluster
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - auth.alphinium.io
+      secretName: strapi-auth-io-tls
+  rules:
+    - host: auth.alphinium.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: strapi-auth
+                port:
+                  number: 1337
