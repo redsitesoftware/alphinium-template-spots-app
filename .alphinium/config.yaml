@@ -1,0 +1,26 @@
+version: '1'
+
+pods:
+  - name: app
+    dockerfile: Dockerfile.frontend
+    build_context: .
+    port: 80
+    health_check:
+      path: /health
+      interval_seconds: 30
+      timeout_seconds: 10
+    env_vars:
+      - name: EXPO_PUBLIC_API_URL
+        description: "Strapi backend URL (e.g. https://backend.myapp.pods.alphinium.io)"
+      - name: EXPO_PUBLIC_APP_NAME
+        description: "App display name shown in the UI"
+      - name: EXPO_PUBLIC_MAPTILER_KEY
+        description: "MapTiler API key for map features (get free key at maptiler.com)"
+      - name: EXPO_PUBLIC_ADMIN_EMAILS
+        description: "Comma-separated emails that get access to the Add-ons screen in-app"
+      - name: EXPO_PUBLIC_OAUTH_PROVIDERS
+        description: "Enabled OAuth providers (e.g. google,email). Defaults to google,email"
+      - name: EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY
+        description: "Stripe publishable key for payment features (optional)"
+      - name: GOOGLE_ANALYTICS_ID
+        description: "Google Analytics 4 Measurement ID (injected at container startup, no rebuild needed)"
