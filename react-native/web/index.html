@@ -4,6 +4,41 @@
     <meta charset="utf-8" />
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <!-- SEO: title, description, keywords -->
+    <meta name="description" content="Discover and share secret local spots on a real map. Community-driven reviews of the places locals actually love. Spots built by Alphinium AI agents." />
+    <meta name="keywords" content="local discovery app, hidden gems app, local spots finder, community map reviews, find local places, explore your city, Spots app, Alphinium discovery" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#10B981" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://alphinium-template-spots-app-demo.user-pods.alphinium.io/" />
+    <meta property="og:title" content="Spots | Discover Hidden Local Gems — Built by Alphinium" />
+    <meta property="og:description" content="Discover and share secret local spots on a real map. Community-driven reviews of the places locals actually love. Spots built by Alphinium AI agents." />
+    <meta property="og:site_name" content="Spots" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Spots | Discover Hidden Local Gems — Built by Alphinium" />
+    <meta name="twitter:description" content="Discover and share secret local spots on a real map. Community-driven reviews of the places locals actually love. Spots built by Alphinium AI agents." />
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://alphinium-template-spots-app-demo.user-pods.alphinium.io/" />
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Spots",
+      "description": "Discover and share secret local spots on a real map. Community-driven reviews of the places locals actually love. Spots built by Alphinium AI agents.",
+      "url": "https://alphinium-template-spots-app-demo.user-pods.alphinium.io/",
+      "applicationCategory": "DemoApplication",
+      "operatingSystem": "Web",
+      "offers": {"@type": "Offer", "price": "0", "priceCurrency": "AUD"},
+      "creator": {"@type": "Organization", "name": "Red Site Software", "url": "https://alphinium.com"}
+    }
+    </script>
     <title>react-native-strapi-prototype</title>
     <style id="expo-reset">
       /* Reset and base styles */
@@ -27,5 +62,20 @@
       You need to enable JavaScript to run this app.
     </noscript>
     <div id="root"></div>
-  </body>
+    <!-- ChatInstance Widget -->
+  <script>
+    window.CHAT_CONFIG = {
+      user_id: 'ci_0b458b34b9ee5252553925990701583f',
+      show_button: 'always',
+      auto_open: false,
+      tts_provider: 'elevenlabs',
+      tts_voice_id: 'hpp4J3VqNfWAUOO0d1Us',
+      theme: {
+        primary_color: '#9333ea',
+        button_position: 'bottom-right'
+      }
+    };
+  </script>
+  <script src="https://api.chatinstance.com/widget/popup-chat.js" defer></script>
+</body>
 </html>
